@@ -1,0 +1,287 @@
+---VISITOR COUNTER---
+
+#include <LiquidCrystal.h>
+#include<Bounce2.h>
+
+LiquidCrystal lcd(13,12,11,10,9,8);
+int in=0;
+int out=0;
+int total =0;
+Bounce button1=Bounce(4,1);
+Bounce button2=Bounce(3,1);
+
+
+void setup() {
+
+  pinMode(4,INPUT);
+  pinMode(3,INPUT);
+  pinMode(5,OUTPUT);
+
+  lcd.begin(16,2);
+  lcd.clear();
+  lcd.print("In: ");
+  lcd.setCursor(10,0);
+  lcd.print("out: ");
+  lcd.setCursor(0,1);
+  lcd.print("Total Inside: ");
+  
+  }
+
+void loop() {
+  if(button1.update()){
+    if(button1.risingEdge()){
+      in++;
+    } 
+  }
+
+  if(button2.update()){
+    if(button2.risingEdge()){
+      out++;
+    } 
+  }
+total = in - out;
+
+if(total == 0){
+  digitalWrite(5,HIGH);
+}
+else{
+  digitalWrite(5,LOW);
+}
+
+lcd.setCursor(3,0);
+lcd.print(in);
+
+lcd.setCursor(14,0);
+lcd.print(out);
+
+lcd.setCursor(14,1);
+lcd.print(total);
+
+}
+
+
+---Door Lock---
+
+#include<Keypad.h>
+#include<LiquidCrystal.h>
+#define Password_Lenght 5
+LiquidCrystal lcd(13,12,11,10,9,8);
+int In1 = 5;
+int In2 = 4;
+int ENA = 3;
+char Data[Password_Lenght];
+char Master[Password_Lenght] = "4567";
+byte data_count = 0, master_count = 0;
+const byte ROWS = 4;
+const byte COLS = 3;
+char keys[ROWS][COLS] = {
+ {'1','2','3'},
+ {'4','5','6'},
+ {'7','8','9'},
+{'*','0','#'}
+};
+byte rowPins[ROWS] = {A5,A4,A3,A2};
+byte colPins[COLS] = {0,1,2};
+Keypad keypad1 = Keypad(makeKeymap(keys), rowPins,colPins,ROWS,COLS);
+void setup() {
+ pinMode(7,OUTPUT);
+ lcd.begin(16,2);
+ pinMode(In1,OUTPUT);
+ pinMode(In2,OUTPUT);
+ lcd.setCursor(1,0);
+ lcd.print("17/ICT/044");
+ delay(1000);
+ lcd.clear();
+ lcd.setCursor(4,0);
+ lcd.print("Arduino");
+ lcd.setCursor(3,1);
+ lcd.print("Door Lock");
+ delay(2000);
+ lcd.clear();
+ digitalWrite(In1,0);
+ digitalWrite(In2,0);
+}
+void loop() {
+ lcd.setCursor(0,0);
+ lcd.print("Enter Password:");
+
+ char key = keypad1.getKey();
+ if (key){
+ Data[data_count] = key;
+ lcd.setCursor(data_count, 1);
+ lcd.print("*");
+ data_count++;
+ }
+ if (data_count == Password_Lenght-1){
+ if (!strcmp(Data, Master)){
+ lcd.clear();
+ lcd.setCursor(0, 0);
+ lcd.print("Valid Password");
+ lcd.setCursor(0, 1);
+ lcd.print("Door Unlocked");
+ analogWrite(ENA,255);
+ digitalWrite(In1,1);
+ digitalWrite(In2,0);
+ delay(5000);
+ digitalWrite(In1,0);
+ digitalWrite(In2,0);
+ delay(3000);
+ lcd.clear();
+ lcd.print("Door Locked");
+ digitalWrite(In1,0);
+ digitalWrite(In2,1);
+ delay(5000);
+ digitalWrite(In1,0);
+ digitalWrite(In2,0);
+
+
+ }else{
+ lcd.clear();
+ lcd.setCursor(0, 0);
+ lcd.print("Invalid Password");
+ lcd.setCursor(5, 1);
+ lcd.print("Blocked!");
+ digitalWrite(7,HIGH);
+ delay(3000);
+ lcd.clear();
+ digitalWrite(7,LOW);
+ lcd.print("Enter Password:");
+ }
+ data_count = 0;
+}
+}
+
+---Calculator---
+
+#include <Keypad.h>
+#include <LiquidCrystal.h>
+LiquidCrystal lcd(13, 12, 11, 10, 9, 8);
+char Keymap[4][4]=
+{
+{'7', '8', '9', '/'},
+{'4', '5', '6', '*'},
+{'1', '2', '3', '-'},
+{'C', '0', '=', '+',}
+};
+byte rowPins [4] ={0,1,2,3};
+byte colPins [4] ={4,5,6,7};
+Keypad myKeypad = Keypad(makeKeymap(Keymap), rowPins, colPins, 4, 4);
+boolean presentValue = false;
+boolean next = false;
+boolean final = false;
+String num1, num2;
+int answer;
+char opr;
+void setup() {
+// put your setup code here, to run once:
+lcd.begin(16,2);
+lcd.setCursor(3,0);
+lcd.print("Electronic");
+lcd.setCursor(3,1);
+lcd.print("Calculator");
+delay(500);
+lcd.clear();
+}
+void loop() {
+// put your main code here, to run repeatedly:
+char key = myKeypad.getKey();
+if(key != NO_KEY &&
+(key=='1'||key=='2'||key=='3'||key=='4'||key=='5'||key=='6'||key=='7'||key=='8'||key=='9'||k
+ey=='0'))
+{
+if(presentValue != true)
+{
+num1 = num1 + key;
+lcd.setCursor(12,0);
+lcd.print(num1);
+}
+else
+{
+num2 = num2 + key;
+lcd.setCursor(12,1);
+lcd.print(num2);
+final = true;
+}
+}
+else if (presentValue == false && key != NO_KEY && (key == '/' || key == '*' || key == '-' || key 
+==
+'+'))
+{
+if (presentValue == false)
+{
+presentValue = true;
+opr = key;
+lcd.setCursor(15,0);
+lcd.print(opr);
+}
+}
+else if (final == true && key != NO_KEY && key == '=')
+{
+if (opr == '+')
+{
+answer = num1.toInt() + num2.toInt();
+}
+else if (opr == '-')
+{
+answer = num1.toInt() - num2.toInt();
+}
+else if (opr == '*')
+{
+answer = num1.toInt() * num2.toInt();
+}
+else if (opr == '/')
+{
+answer = num1.toInt() / num2.toInt();
+}
+lcd.clear();
+lcd.setCursor(15,0);
+lcd.autoscroll();
+lcd.print(answer);
+lcd.noAutoscroll();
+}
+else if (key != NO_KEY && key == 'C')
+{
+lcd.clear();
+presentValue = false;
+final = false;
+num1 = "";
+num2 = "";
+answer = 0;
+opr = ' ';
+}
+}
+
+---Servo Motor---
+
+#include<Servo.h>
+
+Servo myservo;
+int pos = 0;
+
+void setup(){
+  myservo.attach(8);
+  pinMode(13,INPUT_PULLUP);
+  pinMode(12,INPUT_PULLUP);
+  pinMode(11,INPUT_PULLUP);
+  pinMode(10,INPUT_PULLUP);
+  pinMode(9,INPUT_PULLUP);
+}
+
+void loop(){
+  if(digitalRead(13) == LOW){
+    myservo.write(180);
+  }
+  else if(digitalRead(12) == LOW){
+    myservo.write(117);
+  }
+   else if(digitalRead(11) == LOW){
+    myservo.write(93);
+  }
+   else if(digitalRead(10) == LOW){
+    myservo.write(63);
+  }
+   else if(digitalRead(9) == LOW){
+    myservo.write(0);
+  }
+
+}
